@@ -51,7 +51,7 @@ cd src/train && python train.py
 | **Streamlit** | http://localhost:8501 | - |
 | **FastAPI** | http://localhost:8000/docs | - |
 | **MLflow** | http://localhost:5000 | - |
-| **MinIO** | http://localhost:9001 | admin / admin123 |
+| **MinIO** | http://localhost:9001 | minioadmin / minioadmin |
 
 ---
 

@@ -698,4 +698,550 @@ Si le problème persiste:
 * :doc:`quickstart` - Démarrage rapide
 * :doc:`/dev-guide/architecture` - Architecture détaillée
 * `Docker Documentation <https://docs.docker.com/>`_
+
+---
+
+🎓 Problèmes Rencontrés en Développement
+=========================================
+
+Cette section documente des problèmes réels rencontrés pendant le développement du projet
+et leurs solutions. Ces erreurs sont typiques d'un projet MLOps multi-conteneurs.
+
+🔧 Problème #1: Scripts PowerShell avec Emojis
+-----------------------------------------------
+
+**Contexte**
+
+Création de scripts de test automatisés (``TEST_SCRIPTS.ps1``, ``manage.ps1``) avec emojis
+pour améliorer la lisibilité.
+
+**Erreur rencontrée:**
+
+.. code-block:: powershell
+
+   Au caractère ...:17 : 136
+   Jeton inattendu « : » dans l'expression ou l'instruction.
+   Le terminateur ' est manquant dans la chaîne.
+
+**Cause**
+
+PowerShell 5.1 sur Windows ne gère pas correctement les caractères Unicode (emojis, box drawing)
+dans les scripts, même avec l'encodage UTF-8.
+
+**Symptômes:**
+
+* ✅ ❌ ⚠️ 💡 🚀 → Erreurs de parsing
+* Caractères de box drawing (╔ ║ ═) → Terminateurs manquants
+* Accents français (é, è, à) → Problèmes dans les chaînes
+
+**Solution appliquée:**
+
+Remplacer tous les caractères Unicode par des équivalents ASCII:
+
+.. code-block:: powershell
+
+   # ❌ Avant (avec emojis)
+   Write-Host "✅ Services démarrés avec succès!" -ForegroundColor Green
+   Write-Host "❌ Erreur lors du démarrage" -ForegroundColor Red
+   
+   # ✅ Après (ASCII uniquement)
+   Write-Host "[OK] Services demarres avec succes!" -ForegroundColor Green
+   Write-Host "[ERREUR] Erreur lors du demarrage" -ForegroundColor Red
+
+**Recommandations:**
+
+1. Utiliser des préfixes entre crochets: ``[OK]``, ``[ERREUR]``, ``[ATTENTION]``
+2. Éviter les accents dans le code (OK dans les commentaires)
+3. Utiliser ``-ForegroundColor`` pour la couleur au lieu d'emojis
+4. Tester les scripts avec ``Get-Content -Encoding`` pour vérifier l'encodage
+
+**Fichiers concernés:**
+
+* ``tests/TEST_SCRIPTS.ps1``
+* ``tests/manage.ps1``
+
+---
+
+🔧 Problème #2: Notebooks et Connexion MLflow
+----------------------------------------------
+
+**Contexte**
+
+Exécution du notebook ``train_model.ipynb`` sur Windows host avec Docker Compose actif.
+
+**Erreur rencontrée:**
+
+.. code-block:: python
+
+   requests.exceptions.ConnectionError: 
+   HTTPConnectionPool(host='mlflow', port=5000): 
+   Max retries exceeded
+
+**Cause**
+
+Le notebook s'exécute sur le **host Windows** (pas dans Docker) et essaie de se connecter
+à ``http://mlflow:5000``. Le hostname ``mlflow`` n'existe que dans le réseau Docker interne.
+
+**Solution implémentée:**
+
+Détection automatique de l'environnement dans le notebook:
+
+.. code-block:: python
+
+   import os
+   import pathlib
+   from dotenv import load_dotenv
+   
+   # Charger .env.local avec override
+   env_local_path = pathlib.Path("../.env.local").resolve()
+   load_dotenv(env_local_path, override=True)
+   
+   # Récupérer les variables
+   MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI")
+   MLFLOW_S3_ENDPOINT_URL = os.getenv("MLFLOW_S3_ENDPOINT_URL")
+   
+   # Conversion automatique Docker → Localhost
+   if "mlflow:" in MLFLOW_TRACKING_URI:
+       MLFLOW_TRACKING_URI = MLFLOW_TRACKING_URI.replace(
+           "http://mlflow:", 
+           "http://localhost:"
+       )
+   
+   if "minio:" in MLFLOW_S3_ENDPOINT_URL:
+       MLFLOW_S3_ENDPOINT_URL = MLFLOW_S3_ENDPOINT_URL.replace(
+           "http://minio:", 
+           "http://localhost:"
+       )
+   
+   print(f"MLflow URI: {MLFLOW_TRACKING_URI}")
+   print(f"MinIO URL: {MLFLOW_S3_ENDPOINT_URL}")
+
+**Fichier de configuration recommandé:**
+
+Créer ``.env.local`` à la racine:
+
+.. code-block:: bash
+
+   # .env.local (pour notebooks sur host)
+   MLFLOW_TRACKING_URI=http://localhost:5000
+   MLFLOW_S3_ENDPOINT_URL=http://localhost:9000
+   AWS_ACCESS_KEY_ID=minioadmin
+   AWS_SECRET_ACCESS_KEY=minioadmin
+
+**Fichiers concernés:**
+
+* ``notebooks/train_model.ipynb`` (Cell 4)
+
+---
+
+🔧 Problème #3: Chemins Relatifs dans Notebooks
+------------------------------------------------
+
+**Contexte**
+
+Chargement du fichier ``iris_test.csv`` depuis le notebook.
+
+**Erreur rencontrée:**
+
+.. code-block:: python
+
+   FileNotFoundError: [Errno 2] No such file or directory: 
+   '../../data/iris_test.csv'
+
+**Cause**
+
+Le notebook s'exécute dans ``notebooks/`` et le chemin relatif ``../../data/`` 
+remonte trop haut dans l'arborescence.
+
+**Structure réelle:**
+
+.. code-block:: text
+
+   projet/
+   ├── data/
+   │   └── iris_test.csv
+   └── notebooks/
+       └── train_model.ipynb
+
+**Solution:**
+
+Correction du chemin relatif:
+
+.. code-block:: python
+
+   # ❌ Avant (remonte de 2 niveaux)
+   test_data = pd.read_csv("../../data/iris_test.csv")
+   
+   # ✅ Après (remonte de 1 niveau)
+   test_data = pd.read_csv("../data/iris_test.csv")
+
+**Méthode robuste avec pathlib:**
+
+.. code-block:: python
+
+   from pathlib import Path
+   
+   # Obtenir le répertoire racine du projet
+   PROJECT_ROOT = Path(__file__).parent.parent
+   
+   # Construire le chemin absolu
+   data_path = PROJECT_ROOT / "data" / "iris_test.csv"
+   test_data = pd.read_csv(data_path)
+
+**Fichiers concernés:**
+
+* ``notebooks/train_model.ipynb`` (Cell 12)
+
+---
+
+🔧 Problème #4: Credentials MinIO Incorrects
+---------------------------------------------
+
+**Contexte**
+
+Documentation indiquait des credentials MinIO différents de la configuration réelle.
+
+**Erreur rencontrée:**
+
+.. code-block:: text
+
+   S3 Access Denied (403)
+   The Access Key Id you provided does not exist in our records.
+
+**Cause**
+
+Documentation ``README.md`` mentionnait:
+
+.. code-block:: text
+
+   Credentials: admin / admin123
+
+Mais le fichier ``.env`` contenait:
+
+.. code-block:: bash
+
+   MINIO_ROOT_USER=minioadmin
+   MINIO_ROOT_PASSWORD=minioadmin
+
+**Solution:**
+
+Mis à jour de la documentation pour correspondre à la configuration réelle.
+
+**Dans README.md:**
+
+.. code-block:: markdown
+
+   | Service | URL | Credentials |
+   |---------|-----|-------------|
+   | **MinIO** | http://localhost:9001 | minioadmin / minioadmin |
+
+**Recommandations:**
+
+1. Toujours utiliser les credentials par défaut de MinIO: ``minioadmin / minioadmin``
+2. Centraliser la configuration dans ``.env``
+3. Synchroniser la doc avec le code
+4. Ne jamais commiter ``.env`` avec de vrais secrets
+
+**Fichiers concernés:**
+
+* ``README.md``
+* ``.env`` (exemple)
+
+---
+
+🔧 Problème #5: Hot-Reloading Non Détecté
+------------------------------------------
+
+**Contexte**
+
+Après avoir changé l'alias "Production" sur MLflow UI, l'API continue 
+d'utiliser l'ancienne version du modèle.
+
+**Symptômes:**
+
+* Version affichée dans Streamlit ne change pas
+* ``/model-info`` retourne toujours l'ancienne version
+* Logs API ne montrent pas de rechargement
+
+**Causes possibles:**
+
+1. **Polling désactivé:**
+
+   .. code-block:: python
+
+      # src/api/main.py
+      # Si CHECK_INTERVAL est trop grand ou infini
+      CHECK_INTERVAL = 999999  # ❌ Trop long
+
+2. **Cache Streamlit non rafraîchi:**
+
+   Le cache TTL par défaut est de 60 secondes
+
+3. **Alias non modifié correctement:**
+
+   Vérifier sur MLflow UI que l'alias "Production" pointe bien vers la nouvelle version
+
+**Solutions:**
+
+1. **Vérifier le polling interval:**
+
+   .. code-block:: python
+
+      # src/api/main.py
+      CHECK_INTERVAL = 5  # ✅ Vérification toutes les 5 secondes
+
+2. **Forcer le rechargement dans Streamlit:**
+
+   .. code-block:: python
+
+      # src/front/app.py
+      @st.cache_data(ttl=5)  # ✅ Cache de 5 secondes
+      def get_model_info():
+          ...
+
+3. **Vérifier les logs API:**
+
+   .. code-block:: bash
+
+      docker-compose logs api | grep -i "model"
+      
+      # Sortie attendue:
+      # Model reloaded: version changed from 1 to 2
+
+4. **Test manuel:**
+
+   .. code-block:: bash
+
+      # Obtenir la version actuelle
+      curl http://localhost:8000/model-info
+      
+      # Changer l'alias sur MLflow UI
+      
+      # Attendre 5-10 secondes
+      sleep 10
+      
+      # Vérifier la nouvelle version
+      curl http://localhost:8000/model-info
+
+**Fichiers concernés:**
+
+* ``src/api/main.py`` (fonction ``_reload_model_if_needed``)
+* ``src/front/app.py`` (cache Streamlit)
+
+---
+
+🔧 Problème #6: Tests Automatisés Échouent
+-------------------------------------------
+
+**Contexte**
+
+Exécution du script ``tests/TEST_SCRIPTS.ps1`` pour valider les 4 critères.
+
+**Erreur #1: API non accessible**
+
+.. code-block:: powershell
+
+   [ERREUR] Impossible de contacter l'API
+   Verifier que Docker est demarre: docker-compose ps
+
+**Solution:**
+
+.. code-block:: powershell
+
+   # Vérifier que tous les services sont UP
+   docker-compose ps
+   
+   # Attendre que l'API soit prête (health check)
+   Start-Sleep -Seconds 10
+   
+   # Relancer le script
+   .\tests\TEST_SCRIPTS.ps1
+
+**Erreur #2: Volumes non détectés**
+
+.. code-block:: powershell
+
+   [ATTENTION] Nombre de volumes insuffisant: 0/2
+
+**Cause:**
+
+Les volumes ne contiennent pas le nom du projet dans leur nom.
+
+**Solution:**
+
+Vérifier que ``docker-compose.yml`` définit bien les volumes nommés:
+
+.. code-block:: yaml
+
+   volumes:
+     mlflow_data:
+       name: projet_2_1_mlfactory_mlflow_data
+     minio_data:
+       name: projet_2_1_mlfactory_minio_data
+
+**Erreur #3: Dépendances non trouvées**
+
+.. code-block:: powershell
+
+   docker exec api pip list | Select-String "fastapi"
+   # Aucun résultat
+
+**Cause:**
+
+Le conteneur n'est pas encore prêt ou les dépendances ne sont pas installées.
+
+**Solution:**
+
+.. code-block:: bash
+
+   # Reconstruire les images
+   docker-compose build --no-cache api
+   
+   # Redémarrer
+   docker-compose up -d api
+   
+   # Vérifier les logs d'installation
+   docker-compose logs api | grep "pip install"
+
+**Fichiers concernés:**
+
+* ``tests/TEST_SCRIPTS.ps1``
+* ``docker-compose.yml``
+
+---
+
+🔧 Problème #7: Documentation Sphinx Non Buildable
+---------------------------------------------------
+
+**Contexte**
+
+Tentative de génération de la documentation HTML avec Sphinx.
+
+**Erreur rencontrée:**
+
+.. code-block:: bash
+
+   sphinx-build: command not found
+
+**Cause**
+
+Dépendances de documentation non installées.
+
+**Solution:**
+
+.. code-block:: bash
+
+   # Avec UV (recommandé)
+   uv pip install -e ".[docs]"
+   
+   # Ou avec pip
+   pip install -e ".[docs]"
+   
+   # Vérifier l'installation
+   sphinx-build --version
+   
+   # Builder la documentation
+   cd docs
+   make html  # Linux/Mac
+   .\make.bat html  # Windows
+
+**Erreur #2: "No module named 'train'"**
+
+.. code-block:: bash
+
+   WARNING: autodoc: failed to import module 'train'
+
+**Cause:**
+
+Le package n'est pas installé en mode éditable.
+
+**Solution:**
+
+.. code-block:: bash
+
+   # Installer le projet
+   pip install -e .
+   
+   # Vérifier
+   python -c "import train; print(train.__file__)"
+
+**Fichiers concernés:**
+
+* ``pyproject.toml`` (dépendances ``[docs]``)
+* ``docs/conf.py``
+
+---
+
+📝 Leçons Apprises
+==================
+
+1. **Encodage et Scripts**
+   
+   * Toujours tester les scripts PowerShell avant de commiter
+   * Préférer ASCII pour la compatibilité Windows/PowerShell 5.1
+   * Utiliser ``-ForegroundColor`` pour les couleurs
+
+2. **Notebooks et Docker**
+   
+   * Les notebooks s'exécutent sur le host, pas dans Docker
+   * Toujours prévoir une conversion ``mlflow:5000`` → ``localhost:5000``
+   * Créer un fichier ``.env.local`` séparé pour les notebooks
+
+3. **Chemins Relatifs**
+   
+   * Utiliser ``pathlib.Path`` pour des chemins robustes
+   * Toujours tester depuis le répertoire d'exécution réel
+   * Documenter l'arborescence attendue
+
+4. **Configuration Centralisée**
+   
+   * Un seul fichier ``.env`` pour toute la config
+   * Synchroniser README.md avec ``.env.example``
+   * Ne jamais hardcoder les credentials
+
+5. **Hot-Reloading**
+   
+   * Ajouter des logs explicites (``Model reloaded: v1 → v2``)
+   * Exposer ``/model-info`` pour debugging
+   * Configurer un polling interval court (5s) en dev
+
+6. **Tests Automatisés**
+   
+   * Attendre que les services soient prêts (health checks)
+   * Valider chaque critère séparément
+   * Fournir des messages d'erreur clairs avec solutions
+
+7. **Documentation**
+   
+   * Installer toutes les dépendances optionnelles (``[docs]``)
+   * Tester le build de la doc avant de commiter
+   * Maintenir troubleshooting.rst à jour avec les problèmes réels
+
+---
+
+🆘 Besoin d'Aide?
+=================
+
+Si vous rencontrez un problème non documenté ici:
+
+1. **Rechercher dans la documentation complète:**
+
+   * :doc:`installation`
+   * :doc:`quickstart`
+   * :doc:`/dev-guide/architecture`
+
+2. **Consulter les logs:**
+
+   .. code-block:: bash
+
+      docker-compose logs > diagnostic.txt
+
+3. **Ouvrir une issue GitHub** avec:
+
+   * Description du problème
+   * Étapes pour reproduire
+   * Logs pertinents
+   * Configuration (.env anonymisé)
+
+**Repository:** https://github.com/Roxiina/Projet_2_1_MLFactory
 * `MLflow Documentation <https://mlflow.org/docs/latest/index.html>`_

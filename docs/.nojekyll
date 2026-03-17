@@ -1,0 +1,3 @@
+# Bypass Jekyll processing for GitHub Pages
+# This file is required for GitHub Pages to serve Sphinx documentation
+# Without this file, directories starting with _ (like _static, _modules) would be ignored

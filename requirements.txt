@@ -1,0 +1,22 @@
+# Core ML Framework
+mlflow==2.14.3
+scikit-learn==1.7.2
+
+# Data Processing
+pandas==2.2.3
+numpy==1.26.4
+
+# API Framework
+fastapi==0.121.3
+uvicorn==0.38.0
+pydantic==2.12.4
+
+# Frontend
+streamlit==1.42.0
+plotly==5.24.1
+
+# Storage (MinIO/S3)
+boto3==1.42.68
+
+# Configuration
+python-dotenv==1.2.1

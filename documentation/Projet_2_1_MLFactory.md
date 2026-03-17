@@ -1,8 +1,74 @@
 # MLOps Project: The ML Factory
 
-### Vision du projet
+## 📋 Contexte du Projet
 
-L'objectif est de construire une infrastructure "Zero-Downtime". Vous allez créer une chaîne où le modèle de Machine Learning est totalement découplé de l'application qui le consomme. Grâce à l'utilisation d'un **Model Registry** et d'un **Object Storage**, vous apprendrez à mettre à jour l'intelligence d'une API sans jamais redémarrer un seul conteneur.
+### Situation Métier
+
+Vous intégrez l'équipe Data d'une entreprise dont l'application de prédiction doit rester disponible **24h/24**. Actuellement, chaque mise à jour de modèle nécessite une **intervention manuelle sur le serveur et un redémarrage de l'API**, ce qui est jugé **inacceptable** pour les raisons suivantes :
+
+- ⏱️ **Temps d'arrêt** : Chaque déploiement entraîne 5-10 minutes d'indisponibilité
+- 🚨 **Risque d'erreur** : La manipulation manuelle est sujette aux erreurs humaines
+- 🔄 **Pas de rollback rapide** : Retour en arrière complexe en cas de problème
+- 📊 **Absence de traçabilité** : Difficile de savoir quelle version est en production
+
+### Mission
+
+Construire une **"Usine ML" (ML Factory) automatisée** qui permet de passer d'un modèle simple (Régression Logistique) à un modèle plus complexe (Random Forest) de manière **transparente pour l'utilisateur final**, grâce à un système de registre et d'alias de production.
+
+**Preuve de concept attendue** : Démontrer qu'il est possible de changer de modèle en production sans aucun redémarrage de service.
+
+---
+
+## 🎯 Objectifs Pédagogiques
+
+### 1️⃣ Mise en place de l'infrastructure MLOps
+**Objectif** : Configurer un environnement multi-services via Docker-Compose incluant :
+- 🗄️ Un registre de modèles (**MLflow**)
+- 💾 Un stockage objet S3 (**MinIO**)
+- 🌐 Une API de serving (**FastAPI**)
+- 🖥️ Une interface utilisateur (**Streamlit**)
+
+### 2️⃣ Expérimentation et Versionnage
+**Objectif** : Développer un script d'entraînement capable de :
+- 📝 Logger des paramètres et métriques
+- 📦 Pousser les artefacts (modèles) vers le Model Registry
+- 🏷️ Attribuer des identifiants uniques (run_id, version)
+
+### 3️⃣ Développement d'une API de Serving Réactive
+**Objectif** : Concevoir une interface FastAPI qui :
+- 🔍 Interroge dynamiquement le registre MLflow
+- 🎯 Charge le modèle marqué avec l'alias **"Production"**
+- 📊 Retourne la version du modèle avec chaque prédiction
+
+### 4️⃣ Implémentation du "Hot-Reloading"
+**Objectif** : Garantir que l'API met à jour son modèle en mémoire :
+- ⚡ Dès qu'une nouvelle version est promue en production
+- ⏱️ En moins de 10 secondes
+- 🚀 Sans redémarrage du service (**Zero-Downtime**)
+
+### 5️⃣ Création d'une Interface Utilisateur
+**Objectif** : Développer un front-end Streamlit permettant de :
+- 🧪 Tester les prédictions en temps réel
+- 🔢 Afficher visuellement la version du modèle actuellement sollicitée
+- 📈 Comparer les résultats entre différentes versions
+
+### 6️⃣ Gestion du cycle de vie (Lifecycle Management)
+**Objectif** : Valider le pipeline en alternant entre :
+- 🤖 Automatisation du déploiement (via code Python)
+- 👤 Gestion manuelle (via l'interface UI de MLflow)
+- ✅ Simulation d'une validation humaine avant mise en ligne
+
+### 7️⃣ Sécurisation et Traçabilité
+**Objectif** : Assurer la robustesse du système :
+- 🔐 Centraliser la configuration via variables d'environnement (`.env`)
+- 🏷️ Inclure l'ID de version dans chaque réponse de l'API
+- 📋 Garantir une traçabilité totale "de l'entrée à la sortie"
+
+---
+
+## 💡 Vision du Projet
+
+L'objectif est de construire une infrastructure **"Zero-Downtime"**. Vous allez créer une chaîne où le modèle de Machine Learning est totalement découplé de l'application qui le consomme. Grâce à l'utilisation d'un **Model Registry** et d'un **Object Storage**, vous apprendrez à mettre à jour l'intelligence d'une API sans jamais redémarrer un seul conteneur.
 
 ### Architecture du Workspace
 

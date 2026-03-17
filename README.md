@@ -5,7 +5,18 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-teal.svg)](https://fastapi.tiangolo.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Plateforme MLOps complète avec déploiement **Zero-Downtime**, Model Registry MLflow et hot-reloading automatique.
+> **Mission** : Construire une **"Usine ML"** permettant de déployer de nouveaux modèles en production **sans aucun temps d'arrêt**. Démontrer qu'il est possible de passer d'un modèle simple (Régression Logistique) à un modèle complexe (Random Forest) de manière transparente pour l'utilisateur final.
+
+**Plateforme MLOps complète** avec déploiement Zero-Downtime, Model Registry MLflow et hot-reloading automatique.
+
+### 🎯 Problème Résolu
+
+Dans une équipe Data classique, chaque mise à jour de modèle nécessite :
+- 🔴 Un redémarrage manuel du serveur
+- 🔴 5-10 minutes d'indisponibilité
+- 🔴 Risque d'erreur humaine
+
+**Notre solution** : Système de registre MLflow avec alias "Production" permettant de changer de modèle en **< 10 secondes**, sans interruption de service.
 
 ---
 

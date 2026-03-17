@@ -35,30 +35,45 @@ cd src/train && python train.py
 
 ## 📚 Documentation Complète
 
-**Toute la documentation est dans Sphinx** - Générez-la avec:
+### 🔗 Accès Direct aux Guides
+
+**Documentation immédiatement accessible sur GitHub:**
+
+#### 📘 Guides Utilisateur
+- **[Guide de Démarrage Rapide](docs/user-guide/quickstart.rst)** - Démonstration complète du Zero-Downtime
+- **[Installation](docs/user-guide/installation.rst)** - Configuration détaillée de l'environnement
+- **[Guide de Validation](docs/user-guide/validation.rst)** - Critères d'évaluation et tests de performance
+- **[Dépannage](docs/user-guide/troubleshooting.rst)** - Solutions aux problèmes courants
+
+#### 🔧 Guides Développeur
+- **[Architecture](docs/dev-guide/architecture.rst)** - Diagrammes et explications techniques
+- **[Entraînement](docs/dev-guide/training.rst)** - Configuration avancée des modèles
+- **[Déploiement](docs/dev-guide/deployment.rst)** - Production, Kubernetes, Cloud
+
+#### 📖 Référence API
+- **[API FastAPI](docs/api/serving.rst)** - Endpoints et schémas de données
+- **[Frontend Streamlit](docs/api/frontend.rst)** - Composants UI
+- **[Module Training](docs/api/training.rst)** - Fonctions d'entraînement
+
+---
+
+### 🌐 Documentation HTML (Optionnel)
+
+Pour une navigation complète avec recherche et thème professionnel:
 
 ```bash
 # Installer les dépendances docs
-uv pip install -e ".[docs]"
+pip install -e ".[docs]"
 
-# Générer la documentation
+# Générer la documentation HTML
 cd docs
 make html  # ou .\make.bat html sur Windows
 
-# Ouvrir
+# Ouvrir dans le navigateur
 start _build/html/index.html  # Windows
 # ou: xdg-open _build/html/index.html  # Linux
 # ou: open _build/html/index.html      # MacOS
 ```
-
-### 📖 Contenu de la Documentation
-
-La documentation Sphinx contient:
-
-- **Guides Utilisateur** (Installation, Quickstart, Troubleshooting)
-- **Guides Développeur** (Architecture, Entraînement Custom, Déploiement)
-- **Référence API** (Documentation complète des modules Python)
-- **Exemples et Tutoriels** (Zero-Downtime workflow, etc.)
 
 ---
 

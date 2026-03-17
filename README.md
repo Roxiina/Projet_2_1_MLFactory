@@ -35,7 +35,15 @@ cd src/train && python train.py
 
 ## 📚 Documentation Complète
 
-### 🔗 Accès Direct aux Guides
+### 🌐 Documentation en Ligne (GitHub Pages)
+
+**📖 [Documentation Sphinx Complète](https://roxiina.github.io/Projet_2_1_MLFactory/)**
+
+> **Note:** La documentation est automatiquement construite et déployée via GitHub Actions à chaque push sur `main`.
+
+---
+
+### 🔗 Accès Direct aux Guides (Fichiers RST)
 
 **Documentation immédiatement accessible sur GitHub:**
 

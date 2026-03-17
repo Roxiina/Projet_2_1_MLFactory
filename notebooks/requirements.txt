@@ -3,6 +3,9 @@ jupyter>=1.0.0
 jupyterlab>=4.0.0
 notebook>=7.0.0
 
+# Core dependencies
+setuptools>=70.0.0
+
 # ML & Data Science
 mlflow>=2.10.0
 scikit-learn>=1.4.0

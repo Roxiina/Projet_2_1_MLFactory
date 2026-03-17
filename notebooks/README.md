@@ -19,7 +19,7 @@ Notebook complet pour :
 
 ```powershell
 # Windows PowerShell
-.\manage.ps1 notebook
+..\tests\manage.ps1 notebook
 ```
 
 ### Option 2 : Manuellement
@@ -49,12 +49,12 @@ Le fichier `requirements.txt` contient :
 
 1. **Démarrer l'infrastructure** :
    ```powershell
-   .\manage.ps1 start
+   ..\tests\manage.ps1 start
    ```
 
 2. **Lancer Jupyter Lab** :
    ```powershell
-   .\manage.ps1 notebook
+   ..\tests\manage.ps1 notebook
    ```
 
 3. **Ouvrir `train_model.ipynb`** et exécuter les cellules séquentiellement

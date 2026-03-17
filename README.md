@@ -28,10 +28,10 @@ cd src/train && python train.py
 
 ```powershell
 # 1. Démarrer l'infrastructure
-.\manage.ps1 start
+.\tests\manage.ps1 start
 
 # 2. Lancer Jupyter Lab
-.\manage.ps1 notebook
+.\tests\manage.ps1 notebook
 
 # 3. Ouvrir notebooks/train_model.ipynb
 # → Explorer, visualiser, entraîner interactivement !
@@ -159,21 +159,21 @@ python src/train/train.py
 
 ```powershell
 # Windows PowerShell - Gestion du projet
-.\manage.ps1 start      # Démarrer tous les services Docker
-.\manage.ps1 stop       # Arrêter les services
-.\manage.ps1 restart    # Redémarrer les services
-.\manage.ps1 status     # Vérifier l'état des conteneurs
-.\manage.ps1 logs       # Afficher les logs (ou logs [service])
+.\tests\manage.ps1 start      # Démarrer tous les services Docker
+.\tests\manage.ps1 stop       # Arrêter les services
+.\tests\manage.ps1 restart    # Redémarrer les services
+.\tests\manage.ps1 status     # Vérifier l'état des conteneurs
+.\tests\manage.ps1 logs       # Afficher les logs (ou logs [service])
 
 # Entraînement
-.\manage.ps1 train      # Lancer train.py (script CLI)
-.\manage.ps1 notebook   # Lancer Jupyter Lab (interactif)
+.\tests\manage.ps1 train      # Lancer train.py (script CLI)
+.\tests\manage.ps1 notebook   # Lancer Jupyter Lab (interactif)
 
 # Utilitaires
-.\manage.ps1 open       # Ouvrir tous les services dans le navigateur
-.\manage.ps1 open api   # Ouvrir uniquement l'API
-.\manage.ps1 clean      # Nettoyer les volumes (⚠️ supprime les données)
-.\manage.ps1 help       # Afficher l'aide complète
+.\tests\manage.ps1 open       # Ouvrir tous les services dans le navigateur
+.\tests\manage.ps1 open api   # Ouvrir uniquement l'API
+.\tests\manage.ps1 clean      # Nettoyer les volumes (⚠️ supprime les données)
+.\tests\manage.ps1 help       # Afficher l'aide complète
 ```
 
 ---

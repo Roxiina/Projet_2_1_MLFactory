@@ -55,7 +55,39 @@ cd src/train && python train.py
 
 ---
 
-## 📚 Documentation Complète
+## � Gestion des Dépendances
+
+Le projet utilise une approche **hybride** pour maximiser la flexibilité :
+
+### 🐳 Production (Conteneurs Docker)
+Chaque service utilise **Pip** avec un `requirements.txt` spécifique :
+- **API** : `src/api/requirements.txt` (FastAPI, MLflow, scikit-learn)
+- **Frontend** : `src/front/requirements.txt` (Streamlit, requests, plotly)
+
+Les dépendances sont installées lors du build des images Docker (voir Dockerfiles).
+
+### 💻 Développement Local  
+Le projet supporte **UV** via `pyproject.toml` pour :
+- Développement et tests locaux
+- Génération de la documentation Sphinx
+- Gestion unifiée des dépendances optionnelles
+
+```bash
+# Option 1 : Avec UV (recommandé pour dev local)
+uv pip install -e ".[docs]"
+
+# Option 2 : Avec Pip standard
+pip install -e ".[docs]"
+```
+
+**Pourquoi cette approche ?**
+- ✅ **Isolation maximale** : Chaque conteneur a ses dépendances précises
+- ✅ **Flexibilité** : Les développeurs peuvent choisir UV ou Pip en local
+- ✅ **Reproductibilité** : Les `requirements.txt` garantissent des builds identiques
+
+---
+
+## �📚 Documentation Complète
 
 ### 🌐 Documentation en Ligne (GitHub Pages)
 

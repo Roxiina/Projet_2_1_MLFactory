@@ -17,14 +17,22 @@ Le projet repose sur une isolation stricte des services. Chaque composant possè
 ml-factory-project/
 ├── data/ iris_test.csv      
 ├── src/
-│   ├── api/ (main.py + Dockerfile)
-│   ├── front/ (app.py + Dockerfile)
+│   ├── api/ (main.py + Dockerfile + requirements.txt)
+│   ├── front/ (app.py + Dockerfile + requirements.txt)
 │   └── train/ (train.py)
 ├── docker-compose.yml       
-├── pyproject.toml (UV)           
+├── pyproject.toml (UV pour dev local)
 └── .env                     
 
 ```
+
+### Gestion des Dépendances
+
+Le projet utilise une approche hybride pour la gestion des dépendances :
+
+* **Production (Docker)** : Chaque service utilise **Pip** avec un `requirements.txt` spécifique (géré par les Dockerfiles)
+* **Développement local** : Support de **UV** via `pyproject.toml` (optionnel, recommandé pour la doc Sphinx)
+* **Isolation** : Chaque conteneur a ses propres dépendances, garantissant l'isolation complète
 
 ### Configuration de l'Infrastructure
 

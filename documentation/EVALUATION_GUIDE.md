@@ -106,7 +106,7 @@ async def predict(features: IrisFeatures):
 
 ### 3️⃣ Isolation (Conteneurs distincts)
 
-**Critère :** Les services sont correctement isolés dans des conteneurs distincts avec des dépendances gérées par UV ou Pip.
+**Critère :** Les services sont correctement isolés dans des conteneurs distincts avec des dépendances gérées par **Pip** (via `requirements.txt` spécifiques à chaque service).
 
 **Comment le prouver :**
 
@@ -139,6 +139,10 @@ cat requirements.txt
 # streamlit==1.40.0
 # requests==2.32.0
 # plotly==5.18.0
+
+# Vérifier les dépendances installées dans chaque conteneur
+docker exec api pip list
+docker exec front pip list
 ```
 
 **Architecture réseau isolée :**
@@ -157,7 +161,13 @@ services:
       - "8000:8000" # ← Port exposé contrôlé
 ```
 
-> **"Chaque service a son propre Dockerfile, ses propres dépendances, et communique via un réseau Docker isolé. Si l'API crashe, Streamlit continue de tourner."**
+**Note sur la gestion des dépendances :**
+
+- **Production (Docker)** : Pip + `requirements.txt` (géré par Dockerfiles)
+- **Développement local** : Support de UV via `pyproject.toml` (optionnel)
+- **Documentation** : UV recommandé pour générer la doc Sphinx
+
+> **"Chaque service a son propre Dockerfile, ses propres dépendances Pip, et communique via un réseau Docker isolé. Si l'API crashe, Streamlit continue de tourner."**
 
 **Test d'isolation :**
 

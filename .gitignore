@@ -35,6 +35,9 @@ ENV/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+*.ipynb_checkpoints/
+.jupyter/
+notebooks/.local/
 
 # MLflow
 mlruns/

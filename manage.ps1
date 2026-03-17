@@ -19,7 +19,8 @@ function Show-Help {
     Write-Host "  logs [service]  Afficher les logs (tous ou service spécifique)" -ForegroundColor Magenta
     Write-Host "  status          Vérifier l'état des services" -ForegroundColor Cyan
     Write-Host "  clean           Arrêter et supprimer les volumes (⚠️  supprime les données)" -ForegroundColor Red
-    Write-Host "  train           Lancer l'entraînement du modèle" -ForegroundColor Green
+    Write-Host "  train           Lancer l'entraînement du modèle (script)" -ForegroundColor Green
+    Write-Host "  notebook        Lancer Jupyter Lab (entraînement interactif)" -ForegroundColor Magenta
     Write-Host "  open [service]  Ouvrir un service dans le navigateur" -ForegroundColor Cyan
     Write-Host "  help            Afficher cette aide`n"
     Write-Host "Services disponibles:"
@@ -133,6 +134,41 @@ function Start-Training {
     }
 }
 
+function Start-Notebook {
+    Write-Host "`n📓 Lancement de Jupyter Lab...`n" -ForegroundColor Magenta
+    
+    # Vérifier si Python est installé
+    $pythonPath = Get-Command python -ErrorAction SilentlyContinue
+    
+    if (-not $pythonPath) {
+        Write-Host "❌ Python n'est pas installé ou pas dans le PATH" -ForegroundColor Red
+        return
+    }
+    
+    # Vérifier si Jupyter est installé
+    $jupyterCheck = python -c "import jupyterlab" 2>$null
+    
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "📦 Installation de Jupyter Lab..." -ForegroundColor Cyan
+        Push-Location "notebooks"
+        python -m pip install -r requirements.txt
+        Pop-Location
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "`n❌ Erreur lors de l'installation de Jupyter`n" -ForegroundColor Red
+            return
+        }
+    }
+    
+    # Lancer Jupyter Lab
+    Write-Host "🚀 Démarrage de Jupyter Lab sur http://localhost:8888" -ForegroundColor Green
+    Write-Host "   (Ctrl+C pour arrêter)`n" -ForegroundColor Yellow
+    
+    Push-Location "notebooks"
+    python -m jupyter lab --no-browser
+    Pop-Location
+}
+
 function Open-Service {
     param([string]$Service)
     
@@ -168,6 +204,7 @@ switch ($Command.ToLower()) {
     "status" { Show-Status }
     "clean" { Clean-All }
     "train" { Start-Training }
+    "notebook" { Start-Notebook }
     "open" { Open-Service -Service $args[0] }
     "help" { Show-Help }
     default {

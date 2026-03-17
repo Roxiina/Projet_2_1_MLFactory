@@ -11,6 +11,8 @@ Plateforme MLOps complète avec déploiement **Zero-Downtime**, Model Registry M
 
 ## 🚀 Démarrage Rapide (3 minutes)
 
+### Option 1: Script Python (CLI)
+
 ```bash
 # 1. Démarrer l'infrastructure
 docker-compose up -d
@@ -21,6 +23,26 @@ cd src/train && python train.py
 # 3. Ouvrir l'interface
 # → http://localhost:8501
 ```
+
+### Option 2: Jupyter Notebook (Interactif) 📓
+
+```powershell
+# 1. Démarrer l'infrastructure
+.\manage.ps1 start
+
+# 2. Lancer Jupyter Lab
+.\manage.ps1 notebook
+
+# 3. Ouvrir notebooks/train_model.ipynb
+# → Explorer, visualiser, entraîner interactivement !
+```
+
+> **💡 Recommandé pour l'apprentissage et l'exploration**  
+> Le notebook Jupyter offre une expérience interactive avec :
+> - 📊 Visualisations des données (pairplots, corrélations)
+> - 📈 Graphiques de comparaison des modèles
+> - 🔍 Exploration pas-à-pas du workflow MLOps
+> - ✅ Vérification en temps réel du Zero-Downtime
 
 ### 🌐 Services Disponibles
 
@@ -92,6 +114,7 @@ start _build/html/index.html  # Windows
 ✅ **Model Registry MLflow** - Versioning et promotion auto/manuelle  
 ✅ **API REST** - FastAPI avec 5 endpoints documentés  
 ✅ **Interface Interactive** - Streamlit avec dual input (manuel + CSV)  
+✅ **Jupyter Notebooks** - Entraînement interactif avec visualisations 📓  
 ✅ **Object Storage** - MinIO S3-compatible pour les artefacts  
 
 ---
@@ -135,12 +158,22 @@ python src/train/train.py
 ## 🛠️ Scripts Utilitaires
 
 ```powershell
-# Windows PowerShell
-.\manage.ps1 start    # Démarrer tous les services
-.\manage.ps1 train    # Entraîner un modèle
-.\manage.ps1 status   # Vérifier l'état
-.\manage.ps1 logs     # Voir les logs
-.\manage.ps1 stop     # Arrêter les services
+# Windows PowerShell - Gestion du projet
+.\manage.ps1 start      # Démarrer tous les services Docker
+.\manage.ps1 stop       # Arrêter les services
+.\manage.ps1 restart    # Redémarrer les services
+.\manage.ps1 status     # Vérifier l'état des conteneurs
+.\manage.ps1 logs       # Afficher les logs (ou logs [service])
+
+# Entraînement
+.\manage.ps1 train      # Lancer train.py (script CLI)
+.\manage.ps1 notebook   # Lancer Jupyter Lab (interactif)
+
+# Utilitaires
+.\manage.ps1 open       # Ouvrir tous les services dans le navigateur
+.\manage.ps1 open api   # Ouvrir uniquement l'API
+.\manage.ps1 clean      # Nettoyer les volumes (⚠️ supprime les données)
+.\manage.ps1 help       # Afficher l'aide complète
 ```
 
 ---
